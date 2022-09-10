@@ -12,12 +12,15 @@
 (function() {
     'use strict';
 
-    let remove_commas = true;
-    let remove_underscores = true;
-    let remove_parentheses = true;
+
+    let hot_key = "`"; // edit to change hotkey
+    let remove_commas = true; // set to false to include commas
+    let remove_underscores = true; // set to false to include underscore
+    let remove_parentheses = true; // set to false to include parentheses
+
 
     $(document).on('keydown', (event) => {
-        if (event.key == '`') {
+        if (event.key == hot_key) {
             let tags = null;
             if (window.location.href.includes("/gelbooru.com")) tags = get_gel_tags();
             else if (window.location.href.includes("/danbooru.donmai.us")) tags = get_dan_tags();
@@ -45,7 +48,6 @@
         });
         return iprompt;
     }
-
 
     function get_dan_tags() {
         let elms = ["general-tag-list", "character-tag-list", "meta-tag-list", "artist-tag-list", "copyright-tag-list"];
