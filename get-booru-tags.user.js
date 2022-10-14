@@ -19,19 +19,27 @@
     let include_parentheses = false; // set to true to include parentheses
 
     // edit to change hotkeys
-    let hotkey_use_defaults = '`'; // will use include_commas and include_underscores variables
-    let hotkey_yes_commas_yes_underscores = '1';  // ex. "1girl, looking_at_view"
-    let hotkey_yes_commas_no_underscores = '2';   // ex. "1girl, looking at view"
-    let hotkey_no_commas_yes_underscores = '3';   // ex. "1girl looking_at_view"
-    let hotkey_no_commas_no_underscores = '4';    // ex. "1girl looking at view"
+    let hotkey_use_defaults = '`';
+    let hotkey_yes_commas_yes_underscores = '1';  // defaults key + this key
+    let hotkey_yes_commas_no_underscores = '2';   // defaults key + this key
+    let hotkey_no_commas_yes_underscores = '3';   // defaults key + this key
+    let hotkey_no_commas_no_underscores = '4';    // defaults key + this key
+
+    let keysPressed = {};
 
     $(document).on('keydown', (event) => {
-        if (event.key == hotkey_use_defaults) show_prompt(include_commas, include_underscores);
-        else if (event.key == hotkey_no_commas_no_underscores) show_prompt(false, false);
-        else if (event.key == hotkey_yes_commas_no_underscores) show_prompt(true, false);
-        else if (event.key == hotkey_no_commas_yes_underscores) show_prompt(false, true);
-        else if (event.key == hotkey_yes_commas_yes_underscores) show_prompt(true, true);
+        keysPressed[event.key] = true;
+
+        if (keysPressed[hotkey_use_defaults] && event.key == hotkey_no_commas_no_underscores) show_prompt(false, false);
+        else if (keysPressed[hotkey_use_defaults] && event.key == hotkey_yes_commas_no_underscores) show_prompt(true, false);
+        else if (keysPressed[hotkey_use_defaults] && event.key == hotkey_no_commas_yes_underscores) show_prompt(false, true);
+        else if (keysPressed[hotkey_use_defaults] && event.key == hotkey_yes_commas_yes_underscores) show_prompt(true, true);
     })
+
+     $(document).on('keyup', (event) => {
+         delete keysPressed[event.key];
+         if (event.key == hotkey_use_defaults) show_prompt(include_commas, include_underscores);
+     });
 
     function show_prompt(use_commas, use_underscores) {
         let tags = null;
