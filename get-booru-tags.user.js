@@ -27,8 +27,8 @@
 
             if (tags != null) {
                 for (var i = 0; i < tags.length; i++) {
-                    if (remove_underscores) tags[i] = tags[i].replace("_", " ");
-                    else tags[i] = tags[i].replace(" ", "_");
+                    if (remove_underscores) tags[i] = tags[i].replaceAll("_", " ");
+                    else tags[i] = tags[i].replaceAll(" ", "_");
                 }
                 let fprompt = tags.join(", ");
                 if (remove_commas) fprompt = fprompt.replaceAll(",", "");
