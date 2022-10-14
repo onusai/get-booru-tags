@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Get Booru Tags
 // @namespace    https://github.com/onusai/
-// @version      0.3
+// @version      0.4
 // @description  Press the [`] tilde key under ESC to open a prompt with all tags
 // @author       Onusai#6441
 // @match        https://gelbooru.com/index.php?page=post&s=view&id=*
