@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Get Booru Tags
 // @namespace    https://github.com/onusai/
-// @version      0.4.1
+// @version      0.4.4
 // @description  Press the [`] tilde key under ESC to open a prompt with all tags
 // @author       Onusai#6441
 // @match        https://gelbooru.com/index.php?page=post&s=view&id=*
@@ -14,7 +14,7 @@
     'use strict';
 
     // edit to change default behavior
-    let include_commas = false; // set to true to include commas
+    let include_commas = true; // set to true to include commas
     let include_underscores = false; // set to true to include underscore
     let include_parentheses = false; // set to true to include parentheses
 
@@ -55,7 +55,7 @@
             let fprompt = tags.join(", ");
             if (!use_commas) fprompt = fprompt.replaceAll(",", "");
             if (!include_parentheses) fprompt = fprompt.replaceAll("(", "").replaceAll(")", "")
-            prompt("Prompt: " + tags.length + " tags\nTo check token length go to: https://beta.openai.com/tokenizer", fprompt);
+            prompt("Prompt: " + tags.length + " tags", fprompt);
         }
     }
 
