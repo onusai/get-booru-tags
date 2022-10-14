@@ -1,5 +1,5 @@
 # Grab Booru Tags
-Provides a hotkey on booru sites to quickly copy image tags
+Provides hotkeys on booru sites to quickly copy image tags
 
 # How to install
 * Install a script manager plugin/extention on your browser, such as Tampermonkey
@@ -12,7 +12,15 @@ Provides a hotkey on booru sites to quickly copy image tags
 2. Press the [`] tilde key under ESC to open a prompt with all tags
 3. Copy them
 
-Note: it appears underscores and commas are not neccessary to get good results, so they are ommited by default. If you wish to add them, edit the script and set these variables to false: `remove_commas`, `remove_underscores`, `remove_parentheses`
+### Hotkeys:
+* [`] : Use defaults (no commas and no underscores)
+* [1] : Include commas and underscores
+* [2] : Include only commas
+* [3] : Include only underscores
+* [4] : Include no commas and no underscores
+
+
+Note: To change default behavior or hotkeys, edit the script variables
 
 # Supported websites
 * danbooru.donmai.us
