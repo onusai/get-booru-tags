@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Get Booru Tags
 // @namespace    https://github.com/onusai/
-// @version      0.4
+// @version      0.4.1
 // @description  Press the [`] tilde key under ESC to open a prompt with all tags
 // @author       Onusai#6441
 // @match        https://gelbooru.com/index.php?page=post&s=view&id=*
@@ -37,11 +37,12 @@
     })
 
      $(document).on('keyup', (event) => {
-         delete keysPressed[event.key];
          if (event.key == hotkey_use_defaults) show_prompt(include_commas, include_underscores);
      });
 
     function show_prompt(use_commas, use_underscores) {
+        for (var member in keysPressed) delete keysPressed[member];
+
         let tags = null;
         if (window.location.href.includes("/gelbooru.com")) tags = get_gel_tags();
         else if (window.location.href.includes("/danbooru.donmai.us")) tags = get_dan_tags();
