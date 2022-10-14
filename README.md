@@ -1,4 +1,4 @@
-# Grab Booru Tags
+# Get Booru Tags
 Provides hotkeys on booru sites to quickly copy image tags
 
 # How to install
