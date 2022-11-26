@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Get Booru Tags
 // @namespace    https://github.com/onusai/
-// @version      0.4.4
-// @description  Press the [`] tilde key under ESC to open a prompt with all tags
+// @version      0.4.6
+// @description  Press the [~] tilde key under ESC to open a prompt with all tags
 // @author       Onusai#6441
-// @match        https://gelbooru.com/index.php?page=post&s=view&id=*
+// @match        https://gelbooru.com/index.php?page=post&s=view*
 // @match        https://danbooru.donmai.us/posts/*
 // @grant        none
 // @license MIT
@@ -16,10 +16,13 @@
     // edit to change default behavior
     let include_commas = true; // set to true to include commas
     let include_underscores = false; // set to true to include underscore
-    let include_parentheses = false; // set to true to include parentheses
+    let include_parentheses = true; // set to true to include parentheses
+
+    // change tag group position or remove completely
+    let tag_group_order = ["character", "general", "metadata", "artist", "copyright"];
 
     // edit to change hotkeys
-    let hotkey_use_defaults = '`';
+    let hotkey_default = '`';
     let hotkey_yes_commas_yes_underscores = '1';  // defaults key + this key
     let hotkey_yes_commas_no_underscores = '2';   // defaults key + this key
     let hotkey_no_commas_yes_underscores = '3';   // defaults key + this key
@@ -27,18 +30,23 @@
 
     let keysPressed = {};
 
+
+    $(document).on('keyup', (event) => {
+        if (event.key == hotkey_default) show_prompt(include_commas, include_underscores);
+    });
+
+
     $(document).on('keydown', (event) => {
         keysPressed[event.key] = true;
 
-        if (keysPressed[hotkey_use_defaults] && event.key == hotkey_no_commas_no_underscores) show_prompt(false, false);
-        else if (keysPressed[hotkey_use_defaults] && event.key == hotkey_yes_commas_no_underscores) show_prompt(true, false);
-        else if (keysPressed[hotkey_use_defaults] && event.key == hotkey_no_commas_yes_underscores) show_prompt(false, true);
-        else if (keysPressed[hotkey_use_defaults] && event.key == hotkey_yes_commas_yes_underscores) show_prompt(true, true);
+        if (keysPressed[hotkey_default]) {
+            if (event.key == hotkey_no_commas_no_underscores) show_prompt(false, false);
+            else if (event.key == hotkey_yes_commas_no_underscores) show_prompt(true, false);
+            else if (event.key == hotkey_no_commas_yes_underscores) show_prompt(false, true);
+            else if (event.key == hotkey_yes_commas_yes_underscores) show_prompt(true, true);
+        }
     })
 
-     $(document).on('keyup', (event) => {
-         if (event.key == hotkey_use_defaults) show_prompt(include_commas, include_underscores);
-     });
 
     function show_prompt(use_commas, use_underscores) {
         for (var member in keysPressed) delete keysPressed[member];
@@ -54,27 +62,29 @@
             }
             let fprompt = tags.join(", ");
             if (!use_commas) fprompt = fprompt.replaceAll(",", "");
-            if (!include_parentheses) fprompt = fprompt.replaceAll("(", "").replaceAll(")", "")
+            if (!include_parentheses) fprompt = fprompt.replaceAll("(", "").replaceAll(")", "");
+            else fprompt = fprompt.replaceAll("(", "\\(").replaceAll(")", "\\)");
             prompt("Prompt: " + tags.length + " tags", fprompt);
         }
     }
 
+
     function get_gel_tags() {
-        let elms = ["tag-type-general", "tag-type-character", "tag-type-metadata", "tag-type-artist", "tag-type-copyright"];
         let iprompt = [];
-        elms.forEach(tag => {
-            Array.from(document.getElementsByClassName(tag)).forEach(e => {
+        tag_group_order.forEach(tag => {
+            Array.from(document.getElementsByClassName("tag-type-"+tag)).forEach(e => {
                 iprompt.push(e.children[1].textContent);
             })
         });
         return iprompt;
     }
 
+
     function get_dan_tags() {
-        let elms = ["general-tag-list", "character-tag-list", "meta-tag-list", "artist-tag-list", "copyright-tag-list"];
         let iprompt = [];
-        elms.forEach(tag => {
-            Array.from(document.getElementsByClassName(tag)).forEach(e => {
+        tag_group_order.forEach(tag => {
+            tag = ((tag == "metadata") ? "meta" : tag);
+            Array.from(document.getElementsByClassName(tag+"-tag-list")).forEach(e => {
                 if (e.tagName == "UL") {
                     Array.from(e.getElementsByClassName("search-tag")).forEach(s => {
                         iprompt.push(s.textContent);
