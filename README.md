@@ -13,13 +13,10 @@ Provides hotkeys on booru sites to quickly copy image tags
 3. Copy them
 
 ### Hotkeys:
-* `[~]` : Use defaults (includes only commas)
-* `[~]`+`[1]` : Include commas and underscores
-* `[~]`+`[2]` : Include only commas
-* `[~]`+`[3]` : Include only underscores
-* `[~]`+`[4]` : Include no commas and no underscores
+* `[~]` : Use default options
+* `[~]`+`[1]` : Randomize tags
 
-Note: To change default behavior or hotkeys, edit the script variables
+Note: To change options or hotkeys, edit the script variables
 
 # Supported websites
 * danbooru.donmai.us
