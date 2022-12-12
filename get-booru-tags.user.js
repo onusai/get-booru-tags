@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Get Booru Tags
 // @namespace    https://github.com/onusai/
-// @version      0.4.6
+// @version      0.4.7
 // @description  Press the [~] tilde key under ESC to open a prompt with all tags
 // @author       Onusai#6441
 // @match        https://gelbooru.com/index.php?page=post&s=view*
@@ -14,85 +14,90 @@
     'use strict';
 
     // edit to change default behavior
-    let include_commas = true; // set to true to include commas
-    let include_underscores = false; // set to true to include underscore
-    let include_parentheses = true; // set to true to include parentheses
+    let include_commas = true;          // seperate each tag with a comma
+    let remove_underscores = true;      // replace underscores with spaces
+    let remove_parentheses = false;     // remove parentheses from tags
+    let randomize_tag_order = false;    // randomizes tags within each group, group order stays the same
+    let escape_colons = false;          // escapes colons, usually has no impact
 
-    // change tag group position or remove completely
+    // edit to change tag group order or remove certain groups completely
     let tag_group_order = ["character", "general", "metadata", "artist", "copyright"];
 
     // edit to change hotkeys
     let hotkey_default = '`';
-    let hotkey_yes_commas_yes_underscores = '1';  // defaults key + this key
-    let hotkey_yes_commas_no_underscores = '2';   // defaults key + this key
-    let hotkey_no_commas_yes_underscores = '3';   // defaults key + this key
-    let hotkey_no_commas_no_underscores = '4';    // defaults key + this key
+    let hotkey_1 = '1'; // randomize tags
+
+
+    function randomize_tags(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
 
     let keysPressed = {};
 
-
     $(document).on('keyup', (event) => {
-        if (event.key == hotkey_default) show_prompt(include_commas, include_underscores);
+        if (event.key == hotkey_default) show_prompt(randomize_tag_order);
     });
-
 
     $(document).on('keydown', (event) => {
         keysPressed[event.key] = true;
-
-        if (keysPressed[hotkey_default]) {
-            if (event.key == hotkey_no_commas_no_underscores) show_prompt(false, false);
-            else if (event.key == hotkey_yes_commas_no_underscores) show_prompt(true, false);
-            else if (event.key == hotkey_no_commas_yes_underscores) show_prompt(false, true);
-            else if (event.key == hotkey_yes_commas_yes_underscores) show_prompt(true, true);
-        }
+        if (!keysPressed[hotkey_default]) return;
+        if (event.key == hotkey_1) show_prompt(true);
     })
 
 
-    function show_prompt(use_commas, use_underscores) {
+    function show_prompt(randomize=false) {
         for (var member in keysPressed) delete keysPressed[member];
 
         let tags = null;
-        if (window.location.href.includes("/gelbooru.com")) tags = get_gel_tags();
-        else if (window.location.href.includes("/danbooru.donmai.us")) tags = get_dan_tags();
+        if (window.location.href.includes("/gelbooru.com")) tags = get_gel_tags(randomize);
+        else if (window.location.href.includes("/danbooru.donmai.us")) tags = get_dan_tags(randomize);
+        if (!tags) return;
 
-        if (tags != null) {
-            for (var i = 0; i < tags.length; i++) {
-                if (!use_underscores) tags[i] = tags[i].replaceAll("_", " ");
-                else tags[i] = tags[i].replaceAll(" ", "_");
-            }
-            let fprompt = tags.join(", ");
-            if (!use_commas) fprompt = fprompt.replaceAll(",", "");
-            if (!include_parentheses) fprompt = fprompt.replaceAll("(", "").replaceAll(")", "");
-            else fprompt = fprompt.replaceAll("(", "\\(").replaceAll(")", "\\)");
-            prompt("Prompt: " + tags.length + " tags", fprompt);
+        let tag_count = tags.length;
+
+        for (var i = 0; i < tag_count; i++) {
+            if (remove_underscores) tags[i] = tags[i].replaceAll("_", " ");
+            else tags[i] = tags[i].replaceAll(" ", "_");
         }
+
+        tags = tags.join(", ");
+        if (!include_commas) tags = tags.replaceAll(",", "");
+        if (escape_colons) tags = tags.replaceAll(":", ":\\");
+        if (remove_parentheses) tags = tags.replaceAll("(", "").replaceAll(")", "");
+        else tags = tags.replaceAll("(", "\\(").replaceAll(")", "\\)");
+
+        prompt("Prompt: " + tag_count + " tags", tags);
     }
 
 
-    function get_gel_tags() {
-        let iprompt = [];
-        tag_group_order.forEach(tag => {
-            Array.from(document.getElementsByClassName("tag-type-"+tag)).forEach(e => {
-                iprompt.push(e.children[1].textContent);
-            })
-        });
-        return iprompt;
+    function get_gel_tags(randomize=false) {
+        let tags = [];
+        for (let group of tag_group_order) {
+            let group_tags = [];
+            for (let e of document.getElementsByClassName("tag-type-"+group)) group_tags.push(e.children[1].textContent);
+            if (randomize) randomize_tags(group_tags);
+            tags = tags.concat(group_tags);
+        }
+        return tags;
     }
 
 
-    function get_dan_tags() {
-        let iprompt = [];
-        tag_group_order.forEach(tag => {
-            tag = ((tag == "metadata") ? "meta" : tag);
-            Array.from(document.getElementsByClassName(tag+"-tag-list")).forEach(e => {
-                if (e.tagName == "UL") {
-                    Array.from(e.getElementsByClassName("search-tag")).forEach(s => {
-                        iprompt.push(s.textContent);
-                    })
-                }
-            })
-        });
-        return iprompt;
+    function get_dan_tags(randomize=false) {
+        let tags = [];
+        for (let group of tag_group_order) {
+            group = ((group == "metadata") ? "meta" : group);
+            let group_tags = [];
+            for (let e of document.getElementsByClassName(group+"-tag-list")) {
+                if (e.tagName != "UL") continue;
+                for (let te of e.getElementsByClassName("search-tag")) group_tags.push(te.textContent);
+            }
+            if (randomize) randomize_tags(group_tags);
+            tags = tags.concat(group_tags);
+        }
+        return tags;
     }
 
 })();
