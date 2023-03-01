@@ -1,14 +1,18 @@
 // ==UserScript==
 // @name         Get Booru Tags
 // @namespace    https://github.com/onusai/
-// @version      0.4.7
+// @version      0.4.8
 // @description  Press the [~] tilde key under ESC to open a prompt with all tags
 // @author       Onusai#6441
 // @match        https://gelbooru.com/index.php?page=post&s=view*
+// @match        https://safebooru.donmai.us/posts/*
 // @match        https://danbooru.donmai.us/posts/*
+// @match        https://aibooru.online/posts/*
 // @grant        none
 // @license MIT
 // ==/UserScript==
+
+// todo: add support for safebooru.org/index.php?page=post&s=view* and realbooru.com
 
 (function() {
     'use strict';
@@ -21,7 +25,7 @@
     let escape_colons = false;          // escapes colons, usually has no impact
 
     // edit to change tag group order or remove certain groups completely
-    let tag_group_order = ["character", "general", "metadata", "artist", "copyright"];
+    let tag_group_order = ["character", "general", "artist", "copyright"]; // "metadata"
 
     // edit to change hotkeys
     let hotkey_default = '`';
@@ -52,8 +56,9 @@
         for (var member in keysPressed) delete keysPressed[member];
 
         let tags = null;
-        if (window.location.href.includes("/gelbooru.com")) tags = get_gel_tags(randomize);
-        else if (window.location.href.includes("/danbooru.donmai.us")) tags = get_dan_tags(randomize);
+        let url = window.location.href;
+        if (url.includes("/gelbooru.com"))tags = get_gel_tags(randomize);
+        else if (url.includes("/danbooru.donmai.us") || url.includes("/safebooru.donmai.us") || url.includes("/aibooru.online")) tags = get_dan_tags(randomize);
         if (!tags) return;
 
         let tag_count = tags.length;
